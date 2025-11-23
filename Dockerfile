@@ -41,8 +41,8 @@ RUN composer install --no-dev --optimize-autoloader
 RUN chmod -R 775 storage bootstrap/cache
 
 # Run Laravel migrations and seeders
-RUN php artisan migrate:fresh --force
-RUN php artisan db:seed --force
+#RUN php artisan migrate:fresh --force
+#RUN php artisan db:seed --force
 
 # Apache configuration for Laravel
 RUN echo '<VirtualHost *:80>' > /etc/apache2/sites-available/000-default.conf \
