@@ -40,6 +40,10 @@ RUN composer install --no-dev --optimize-autoloader
 # Set permissions for Laravel cache and storage
 RUN chmod -R 775 storage bootstrap/cache
 
+# Run Laravel migrations and seeders
+RUN php artisan migrate:fresh --force
+RUN php artisan db:seed --force
+
 # Apache configuration for Laravel
 RUN echo '<VirtualHost *:80>' > /etc/apache2/sites-available/000-default.conf \
  && echo '    DocumentRoot /var/www/html/public' >> /etc/apache2/sites-available/000-default.conf \
