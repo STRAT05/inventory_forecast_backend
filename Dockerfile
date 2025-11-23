@@ -1,10 +1,8 @@
-# PHP 7.4 + Apache
-FROM php:7.4-apache
+# PHP 8.3 + Apache
+FROM php:8.3-apache
 
 # Set working directory
 WORKDIR /var/www/html
-
-COPY . /var/www/html
 
 # Install system dependencies & PHP extensions
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -30,10 +28,19 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
+# Copy application code into the container
+COPY . /var/www/html
+
 # Install Laravel dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Apache config
+# Optional: generate Laravel app key (if you have .env already)
+RUN php artisan key:generate || echo "Laravel key generate skipped (no .env)"
+
+# Set proper permissions
+RUN chown -R www-data:www-data /var/www/html && chmod -R 755 /var/www/html
+
+# Configure Apache for Laravel project
 RUN echo '<VirtualHost *:80>' > /etc/apache2/sites-available/000-default.conf \
  && echo '    DocumentRoot /var/www/html/public' >> /etc/apache2/sites-available/000-default.conf \
  && echo '    <Directory /var/www/html/public>' >> /etc/apache2/sites-available/000-default.conf \
@@ -44,9 +51,8 @@ RUN echo '<VirtualHost *:80>' > /etc/apache2/sites-available/000-default.conf \
  && echo '    CustomLog ${APACHE_LOG_DIR}/access.log combined' >> /etc/apache2/sites-available/000-default.conf \
  && echo '</VirtualHost>' >> /etc/apache2/sites-available/000-default.conf
 
-# Permissions
-RUN chown -R www-data:www-data /var/www/html && chmod -R 755 /var/www/html
-
+# Expose port 80
 EXPOSE 80
 
+# Start Apache server
 CMD ["apache2-foreground"]
