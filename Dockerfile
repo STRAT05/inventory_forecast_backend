@@ -28,19 +28,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-# Copy application code into the container
-COPY . /var/www/html
+# Verify Composer installation
+RUN /usr/local/bin/composer --version
 
-# Install Laravel dependencies (Composer)
-RUN composer install --no-dev --optimize-autoloader
-
-# Optional: generate Laravel app key (if you have .env already)
-RUN php artisan key:generate || echo "Laravel key generate skipped (no .env)"
-
-# Set proper permissions
-RUN chown -R www-data:www-data /var/www/html && chmod -R 755 /var/www/html
-
-# Configure Apache for Laravel project
+# Configure Apache for Laravel
 RUN echo '<VirtualHost *:80>' > /etc/apache2/sites-available/000-default.conf \
  && echo '    DocumentRoot /var/www/html/public' >> /etc/apache2/sites-available/000-default.conf \
  && echo '    <Directory /var/www/html/public>' >> /etc/apache2/sites-available/000-default.conf \
@@ -51,8 +42,11 @@ RUN echo '<VirtualHost *:80>' > /etc/apache2/sites-available/000-default.conf \
  && echo '    CustomLog ${APACHE_LOG_DIR}/access.log combined' >> /etc/apache2/sites-available/000-default.conf \
  && echo '</VirtualHost>' >> /etc/apache2/sites-available/000-default.conf
 
-# Expose port 80
+# Permissions for Apache
+RUN chown -R www-data:www-data /var/www/html && chmod -R 755 /var/www/html
+
+# Expose Apache port
 EXPOSE 80
 
-# Start Apache server
+# Start Apache
 CMD ["apache2-foreground"]
