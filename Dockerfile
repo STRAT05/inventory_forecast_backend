@@ -31,7 +31,10 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 # Verify Composer installation
 RUN /usr/local/bin/composer --version
 
-# Configure Apache for Laravel
+# Copy application code into container
+COPY . /var/www/html
+
+# Configure Apache for Laravel project
 RUN echo '<VirtualHost *:80>' > /etc/apache2/sites-available/000-default.conf \
  && echo '    DocumentRoot /var/www/html/public' >> /etc/apache2/sites-available/000-default.conf \
  && echo '    <Directory /var/www/html/public>' >> /etc/apache2/sites-available/000-default.conf \
@@ -42,11 +45,11 @@ RUN echo '<VirtualHost *:80>' > /etc/apache2/sites-available/000-default.conf \
  && echo '    CustomLog ${APACHE_LOG_DIR}/access.log combined' >> /etc/apache2/sites-available/000-default.conf \
  && echo '</VirtualHost>' >> /etc/apache2/sites-available/000-default.conf
 
-# Permissions for Apache
+# Set permissions for Apache
 RUN chown -R www-data:www-data /var/www/html && chmod -R 755 /var/www/html
 
-# Expose Apache port
+# Expose port 80 for Apache
 EXPOSE 80
 
-# Start Apache
+# Start Apache server
 CMD ["apache2-foreground"]
