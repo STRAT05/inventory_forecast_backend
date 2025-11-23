@@ -31,7 +31,7 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 # Copy application code into the container
 COPY . /var/www/html
 
-# Install Laravel dependencies
+# Install Laravel dependencies (Composer)
 RUN composer install --no-dev --optimize-autoloader
 
 # Optional: generate Laravel app key (if you have .env already)
